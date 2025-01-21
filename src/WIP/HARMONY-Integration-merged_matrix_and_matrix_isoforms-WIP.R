@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # start like this
-# Rscript --vanilla Integrate_ngn2_0624_res2.R
+# Rscript --vanilla HARMONY-Integration-merged_matrix_and_matrix_isoforms-WIP.R
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
