@@ -20,7 +20,7 @@ SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/CONVERSION-s
 INPUT_PATH='.../scNanoGPS/scNanoGPS_res/...'
 
 # OUTPUT PATH
-OUTPUT_PATH=''
+OUTPUT_PATH='output/long_read'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
