@@ -1,0 +1,10 @@
+# SPECIFIC FILES TO IGNORE
+
+*.rds
+slurm-*
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# WHOLE FOLDERS TO IGNORE
+# /* = ignore all files here (instead of entire directory, which will skip the exclusions)
+
+output/
