@@ -20,6 +20,12 @@
 #   - barcodes.tsv
 #   - genes.tsv
 #   - matrix.mtx --> in sparse matrix format
+#
+# # HOW TO RUN (for converting to a merged matrix + matrix_isoform file)
+# # - Open a terminal where this script file is and run:
+# module load python/3.10
+# python CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py --input_path <INPUT_PATH> --output_path <OUTPUT_PATH>
+#
 # 
 # # IMPORTS
 
