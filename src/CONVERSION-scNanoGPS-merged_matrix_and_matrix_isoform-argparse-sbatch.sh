@@ -9,12 +9,12 @@
 
 # HOW TO RUN:
 # - Open a terminal where this script file is and run:
-# sbatch CONVERSION-scNanoGPS-merge_matrix_and_matrix_isoform-argparse-sbatch.sh
+# sbatch CONVERSION-scNanoGPS-merged_matrix_and_matrix_isoform-argparse-sbatch.sh
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # DEFINE VARIABLES FOR ARGPARSE - change these!!!
-SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/CONVERSION-scNanoGPS-merge_matrix_and_matrix_isoform-argparse.py'
+SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/CONVERSION-scNanoGPS-merged_matrix_and_matrix_isoform-argparse.py'
 
 # # INPUT PATHS
 # INPUT_PATH='/data/CARDPB/data/snRNA_longread/scNanoGPS-neuro/scNanoGPS_res/SH-04-08_singlecell_LR/20240321-1/20240321'
