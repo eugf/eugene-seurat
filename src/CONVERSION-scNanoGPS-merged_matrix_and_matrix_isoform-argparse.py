@@ -19,6 +19,12 @@
 # - Output files created:
 #   - merge_matrix_and_matrix_isoform.tsv
 # 
+#
+# # HOW TO RUN (for converting to a merged matrix + matrix_isoform file)
+# # - Open a terminal where this script file is and run:
+# module load python/3.10
+# python CONVERSION-scNanoGPS-merged_matrix_and_matrix_isoform-argparse.py --input_path <INPUT_PATH> --output_path <OUTPUT_PATH>
+#
 # # IMPORTS
 
 # In[1]:
@@ -73,7 +79,6 @@ print('args =', args)
 
 # DEFINE FILE PATHS - CHANGE THIS!!!
 # Input paths - look inside the scNanoGPS output folder (`/scNanoGPS_res`) by patient ID until you reach the parent folder that holds the matrix.tsv + matrix_isoform.tsv files
-# scNanoGPS_output_dir = '/data/CARDPB/data/snRNA_longread/scNanoGPS-neuro/scNanoGPS_res/SH-04-08_singlecell_LR/20240321-1/20240321'
 scNanoGPS_output_dir = args.input_path
 
 # From there, create the paths for the matrix and matrix isoform files
@@ -90,7 +95,6 @@ print('file_path_matrix_isoform =', file_path_matrix_isoform)
 
 
 # # Output dir
-# output_dir = '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/merged'
 output_dir = args.output_path
 print('output_dir =', output_dir)
 
@@ -406,11 +410,6 @@ df_merged_5
 # Merge all
 df_merged = pd.merge(df_matrix_drop, df_isoform, how = 'outer')
 
-#! ERROR - kernel crashed --> FIXED! can run now
-
-#! WARNING
-# /tmp/ipykernel_3277778/3684354177.py:2: UserWarning: You are merging on int and float columns where the float values are not equal to their int representation.
-
 
 # In[26]:
 
@@ -678,16 +677,6 @@ output_file = os.path.join(sample_dir, 'matrix.mtx')
 # Run conversion function to export to a .MTX file
 tsv_to_mtx(file_path_matrix_dropped_tsv, output_file)
 print(f'Saved matrix.mtx to: {output_file}')
-
-# # WARNING 
-# /tmp/ipykernel_3478404/3422867202.py:4: DtypeWarning: Columns (1) have mixed types. Specify dtype option on import or set low_memory=False.
-#   df = pd.read_csv(
-      
-# #! ERROR
-# The Kernel crashed while executing code in the current cell or a previous cell. 
-# Please review the code in the cell(s) to identify a possible cause of the failure. 
-# Click here for more info. 
-# View Jupyter log for further details.
 
 # NOTE - in the JNB running in `sinteractive` the mem exceeded 160 GB when the code fails, gets up to 100 GB if it works tho, uses less, like ~50 GB from sbatch
 
