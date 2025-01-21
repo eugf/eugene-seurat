@@ -233,7 +233,9 @@ print('df_matrix.shape =', df_matrix.shape)
 # Drop these cols from the DFs
 df_matrix_drop = df_matrix.drop(
     columns = ['Chr', 'Start', 'End', 'Strand', 'Length'], 
-    inplace = False)
+    inplace = False
+    )
+
 df_matrix_drop
 
 
@@ -244,7 +246,8 @@ df_matrix_drop
 df_isoform = pd.read_csv(
     file_path_matrix_isoform, 
     sep = '\t',     # For TSV file
-)
+    )
+
 df_isoform
 
 
@@ -487,10 +490,6 @@ df_merged = pd.read_csv(
 
 df_merged
 
-# #! WARNING
-# /tmp/ipykernel_3477477/3859502601.py:2: DtypeWarning: Columns (1) have mixed types. Specify dtype option on import or set low_memory=False.
-#   df = pd.read_csv(
-
 
 # # CONVERSION
 # 
@@ -679,4 +678,3 @@ tsv_to_mtx(file_path_matrix_dropped_tsv, output_file)
 print(f'Saved matrix.mtx to: {output_file}')
 
 # NOTE - in the JNB running in `sinteractive` the mem exceeded 160 GB when the code fails, gets up to 100 GB if it works tho, uses less, like ~50 GB from sbatch
-
