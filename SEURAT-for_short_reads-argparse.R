@@ -2,15 +2,14 @@
 
 # # HOW TO RUN:
 # # - Open a terminal where this script file is and run:
-# Rscript SEURAT-for_scNanoGPS-merged-argparse.R <INPUT_DIR> --output-dir <OUTPUT_DIR> --celltype-marker-dir <CELLTYPE_MARKER_DIR>
+# Rscript SEURAT-for_short_reads-argparse.R <INPUT_DIR> --output-dir <OUTPUT_DIR> --celltype-marker-dir <CELLTYPE_MARKER_DIR>
 
 # SEURAT TUTORIAL
 # SOURCE: https://satijalab.org/seurat/articles/pbmc3k_tutorial
 
 # NOTES:
-# - SCRIPT PATH: /vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_scNanoGPS-matrix.R
+# - SCRIPT PATH: /vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_short_reads-argparse.R
 # - CARD folder path: /data/CARD_singlecell/Brain_atlas/NABEC_multiome
-# - Example from Xylena: /data/CARD_singlecell/Brain_atlas/SN_Multiome/batch7/RNA_only/UM0139-RNA/outs/filtered_feature_bc_matrix/
 
 # We start by reading in the data. 
 # The `Read10X()` function reads in the output of the `cellranger` 
@@ -64,6 +63,13 @@ parser$add_argument(
   type        = 'character'
 )
 
+# WARNING - user needs to provides the ID for this script
+parser$add_argument(
+  '--id', 
+  required    = TRUE,
+  type        = 'character'
+)
+
 # LOAD USER-PROVIDED ARGUMENTS
 args <- parser$parse_args()
 
@@ -76,29 +82,19 @@ current_date  <- as.character(Sys.Date())
 current_time  <- format(Sys.time(),"%H-%M-%S")
 
 # # DEFINE PATHS
-# Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
-# NOTE - the paths for this script are merged matrix + matrix_isoform.TSV files that were converted to those 3 files
+# # Input path - takes a `filtered_feature_bc_matrix.h5`` file from Arc Cellranger output folder
+# input_dir <- '../..-ARC/outs/filtered_feature_bc_matrix.h5'
 input_dir <- args$input_dir
 cat('input_dir =', input_dir, '\n')
 
-#* TODO - turn the ID part into a function?
-# Get the patient ID #
-id_path <- file.path(input_dir, 'id.txt')
-cat('id_path =', id_path, '\n')
-id <- readLines(id_path)
-
-# Shorten ID - Split by underscore, and keep the first 2 elements
-split_ids <- sapply(strsplit(id, "_"), function(x) x[1:2])
-split_ids
-rejoined_ids <- apply(split_ids, 2, function(x) paste(x, collapse = "_"))
-rejoined_ids
-id <- rejoined_ids
+#* TODO - fix the ID section OR make into argparse
+id <- args$id
 cat('id =', id, '\n')
 
 # # Output path
 # output_dir <- input_dir
 output_dir <- args$output_dir
-output_path <- file.path(output_dir, 'PLOTS-Seurat-merged')
+output_path <- file.path(output_dir, 'short_reads', id, 'PLOTS-Seurat-short_reads')
 
 # CHECK - if the directory exists, if yes, increment the name
 create_incremented_dir <- function(base_dir) {
@@ -128,18 +124,20 @@ cat('Created directory at: \n', output_path, '\n')
 # LOAD DATA
 
 # SETUP THE SEURAT OBJECT
-# scNanoGPS.data <- Read10X(data.dir = input_dir, gene.column = 1) # TRY - removing the gene.column selection for the merged files
-scNanoGPS.data <- Read10X(data.dir = input_dir)
+seurat_object.data <- Read10X_h5(input_dir)
 
 # Initialize the Seurat object with the raw (non-normalized data).
 # pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
-scNanoGPS <- CreateSeuratObject(
-  counts = scNanoGPS.data, 
-  project = id)
+seurat_object <- CreateSeuratObject(
+  counts = seurat_object.data, 
+  project = id, 
+  min.cells = 3, 
+  min.features = 200)
 
 # Get info
-cat('Initial Seurat object created stats: \n') 
-scNanoGPS_initial_info <- print(scNanoGPS)
+cat('Initial Seurat object created stats: \n')
+seurat_object_initial_info <- print(seurat_object)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -163,19 +161,19 @@ scNanoGPS_initial_info <- print(scNanoGPS)
 #     o We use the set of all genes starting with MT- as a set of mitochondrial genes
 
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
-scNanoGPS[["percent.mt"]] <- PercentageFeatureSet(scNanoGPS, pattern = "^MT-")
+seurat_object[["percent.mt"]] <- PercentageFeatureSet(seurat_object, pattern = "^MT-")
 
 # # Where are QC metrics stored in Seurat?
 # - The number of unique genes and total molecules are automatically calculated during `CreateSeuratObject()`
 #   o You can find them stored in the object meta data
 # # Show QC metrics for the first 5 cells
-head(scNanoGPS@meta.data, 5)
+head(seurat_object@meta.data, 5)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # MY FUNCTIONS
 
-# FUNCTION - to construct the file name
+# FILE NAMING - Construct the file name
 my_plot_name <- function(plot_name = "") {
   
   # Construct file name and output folder based on user-input and other defined vars
@@ -228,7 +226,7 @@ my_plot_save <- function(
 #   - We filter cells that have >5% mitochondrial counts
 
 # Visualize QC metrics as a violin plot
-VlnPlot(scNanoGPS, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+VlnPlot(seurat_object, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -240,8 +238,8 @@ my_plot_save(save_plot_violin_counts_features)
 
 # FeatureScatter is typically used to visualize feature-feature relationships, but can be used
 # for anything calculated by the object, i.e. columns in object metadata, PC scores etc.
-plot1 <- FeatureScatter(scNanoGPS, feature1 = "nCount_RNA", feature2 = "percent.mt")
-plot2 <- FeatureScatter(scNanoGPS, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot1 <- FeatureScatter(seurat_object, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(seurat_object, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 plot1 + plot2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,7 +257,7 @@ my_plot_save(
 #* TODO - add to argparse?
 # FILTER MANUALLY - based on the violin plot
 filter_nFeature_RNA_lower <- 0
-filter_nFeature_RNA_upper <- 2500
+filter_nFeature_RNA_upper <- 12000
 filter_percent.mt         <- 5
 
 cat('\nFilter parameters: \n')
@@ -267,8 +265,8 @@ cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
 cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
 cat('filter_percent.mt          =', filter_percent.mt, '\n')
 
-# scNanoGPS <- subset(scNanoGPS, subset = nFeature_RNA > 0 & nFeature_RNA < 2500 & percent.mt < 5)
-scNanoGPS <- subset(scNanoGPS, 
+# seurat_object <- subset(seurat_object, subset = nFeature_RNA > 0 & nFeature_RNA < 2500 & percent.mt < 5)
+seurat_object <- subset(seurat_object, 
   subset  = nFeature_RNA > filter_nFeature_RNA_lower & 
             nFeature_RNA < filter_nFeature_RNA_upper & 
             percent.mt < filter_percent.mt
@@ -281,12 +279,12 @@ scNanoGPS <- subset(scNanoGPS,
 # # After removing unwanted cells from the dataset, the next step is to normalize the data. 
 # # By default, we employ a global-scaling normalization method “LogNormalize” that normalizes 
 # # the feature expression measurements for each cell by the total expression, multiplies this by a scale factor 
-# # (10,000 by default), and log-transforms the result. In Seurat v5, Normalized values are stored in `scNanoGPS[["RNA"]]$data`.
-# scNanoGPS <- NormalizeData(scNanoGPS, normalization.method = "LogNormalize", scale.factor = 10000)
+# # (10,000 by default), and log-transforms the result. In Seurat v5, Normalized values are stored in `seurat_object[["RNA"]]$data`.
+# seurat_object <- NormalizeData(seurat_object, normalization.method = "LogNormalize", scale.factor = 10000)
 
 # For clarity, in this previous line of code (and in future commands), we provide the default values 
 # for certain parameters in the function call. However, this isn’t required and the same behavior can be achieved with:
-scNanoGPS <- NormalizeData(scNanoGPS)
+seurat_object <- NormalizeData(seurat_object)
 
 # While this method of normalization is standard and widely used in scRNA-seq analysis, 
 # global-scaling relies on an assumption that each cell originally contains the same number of RNA molecules. 
@@ -306,15 +304,20 @@ scNanoGPS <- NormalizeData(scNanoGPS)
 # and improves on previous versions by directly modeling the mean-variance relationship inherent in single-cell data, 
 # and is implemented in the `FindVariableFeatures()` function. By default, we return 2,000 features per dataset. 
 # These will be used in downstream analysis, like PCA.
-scNanoGPS <- FindVariableFeatures(scNanoGPS, selection.method = "vst", nfeatures = 2000)
+# seurat_object <- FindVariableFeatures(seurat_object, selection.method = "vst", nfeatures = 2000)
+seurat_object <- FindVariableFeatures(seurat_object, layer = 'data.Gene Expression', selection.method = "vst", nfeatures = 2000)
 
+#! WARNING - MUST SPECIFY LAYER IN SEURAT V5
+# `data.` layer is the normalized data, use this!
+
+#* TODO - do i need to specify the layer again?
 # Identify the 10 most highly variable genes
-top10 <- head(VariableFeatures(scNanoGPS), 10)
+top10 <- head(VariableFeatures(seurat_object, layer = 'data.Gene Expression'), 10)
 cat('top 10 = \n')
 paste(top10)
 
 # Plot variable features with and without labels
-plot1 <- VariableFeaturePlot(scNanoGPS)
+plot1 <- VariableFeaturePlot(seurat_object)
 # plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
 plot2 <- LabelPoints(
   plot = plot1,
@@ -349,14 +352,17 @@ my_plot_save(
 # - The results of this are stored in `pbmc[["RNA"]]$scale.data`
 # - By default, only variable features are scaled.
 # - You can specify the `features` argument to scale additional features
-all.genes <- rownames(scNanoGPS)
-scNanoGPS <- ScaleData(scNanoGPS, features = all.genes)
+all.genes <- rownames(seurat_object)
+seurat_object <- ScaleData(seurat_object, features = all.genes)
 
-# How can I remove unwanted sources of variation
-# In Seurat, we also use the `ScaleData()` function to remove unwanted sources of variation from a single-cell dataset. 
-# For example, we could ‘regress out’ heterogeneity associated with (for example) 
-# `cell cycle stage` ( https://satijalab.org/seurat/articles/cell_cycle_vignette ), or mitochondrial contamination i.e.:
-scNanoGPS <- ScaleData(scNanoGPS, vars.to.regress = "percent.mt")
+# # How can I remove unwanted sources of variation
+# # In Seurat, we also use the `ScaleData()` function to remove unwanted sources of variation from a single-cell dataset. 
+# # For example, we could ‘regress out’ heterogeneity associated with (for example) 
+# # `cell cycle stage` ( https://satijalab.org/seurat/articles/cell_cycle_vignette ), or mitochondrial contamination i.e.:
+# seurat_object <- ScaleData(seurat_object, vars.to.regress = "percent.mt")
+
+#! ERROR
+# Error in LayerData.Assay5(X[[i]], ...) : features are not found
 
 # However, particularly for advanced users who would like to use this functionality, we strongly recommend the use of our new normalization workflow, `SCTransform()`. 
 # The method is described in our `paper` ( https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02584-9 ), 
@@ -373,7 +379,7 @@ scNanoGPS <- ScaleData(scNanoGPS, vars.to.regress = "percent.mt")
 
 # For the first principal components, Seurat outputs a list of genes with the most positive and negative loadings, 
 # representing modules of genes that exhibit either correlation (or anti-correlation) across single-cells in the dataset.
-scNanoGPS <- RunPCA(scNanoGPS, features = VariableFeatures(object = scNanoGPS))
+seurat_object <- RunPCA(seurat_object, features = VariableFeatures(object = seurat_object))
 
 # Seurat provides several useful ways of visualizing both cells and features that define the PCA, including:
 # - `VizDimReduction()`, 
@@ -381,18 +387,18 @@ scNanoGPS <- RunPCA(scNanoGPS, features = VariableFeatures(object = scNanoGPS))
 # - `DimHeatmap()`
 
 # Examine and visualize PCA results a few different ways
-print(scNanoGPS[["pca"]], dims = 1:5, nfeatures = 5)
+print(seurat_object[["pca"]], dims = 1:5, nfeatures = 5)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Get info
 cat('Final Seurat object (post filtering) stats: \n')
-scNanoGPS_final_info <- print(scNanoGPS)
+seurat_object_final_info <- print(seurat_object)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # PLOT
-VizDimLoadings(scNanoGPS, dims = 1:2, reduction = "pca")
+VizDimLoadings(seurat_object, dims = 1:2, reduction = "pca")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -403,7 +409,7 @@ my_plot_save(save_plot_viz_dim_loadings)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # PLOT
-DimPlot(scNanoGPS, reduction = "pca") + NoLegend()
+DimPlot(seurat_object, reduction = "pca") + NoLegend()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -419,8 +425,8 @@ my_plot_save(save_plot_dim)
 # Setting `cells` to a number plots the ‘extreme’ cells on both ends of the spectrum, 
 # which dramatically speeds plotting for large datasets. 
 # Though clearly a supervised analysis, we find this to be a valuable tool for exploring correlated feature sets.
-# DimHeatmap(scNanoGPS, dims = 1, cells = 500, balanced = TRUE)
-DimHeatmap(scNanoGPS, dims = 1, cells = 500, balanced = TRUE, fast = FALSE)
+# DimHeatmap(seurat_object, dims = 1, cells = 500, balanced = TRUE)
+DimHeatmap(seurat_object, dims = 1, cells = 500, balanced = TRUE, fast = FALSE)
 
 #* NOTE - Setting `fast = FALSE` is crucial for generating a customizable ggplot object that can be saved. 
 #* When fast = TRUE, the function uses the base R image() function, which is faster but doesn't return a plot object.
@@ -434,7 +440,7 @@ my_plot_save(save_plot_dim_heatmap)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # PLOT
-DimHeatmap(scNanoGPS, dims = 1:15, cells = 500, balanced = TRUE, fast = FALSE)
+DimHeatmap(seurat_object, dims = 1:15, cells = 500, balanced = TRUE, fast = FALSE)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -463,7 +469,7 @@ my_plot_save(
 # An alternative heuristic method generates an ‘Elbow plot’: a ranking of principle components based on the 
 # percentage of variance explained by each one (`ElbowPlot()` [ https://satijalab.org/seurat/reference/elbowplot ] function).
 # In this example, we can observe an ‘elbow’ around PC9-10, suggesting that the majority of true signal is captured in the first 10 PCs.
-ElbowPlot(scNanoGPS)
+ElbowPlot(seurat_object)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -519,12 +525,12 @@ my_plot_save(save_plot_elbow)
 # We find that setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells. 
 # Optimal resolution often increases for larger datasets. The clusters can be found using the `Idents()` function.
 
-scNanoGPS <- FindNeighbors(scNanoGPS, dims = 1:10)
-# scNanoGPS <- FindClusters(scNanoGPS, resolution = 0.5)
-scNanoGPS <- FindClusters(scNanoGPS, resolution = 0.2)
+seurat_object <- FindNeighbors(seurat_object, dims = 1:10)
+# seurat_object <- FindClusters(seurat_object, resolution = 0.5)
+seurat_object <- FindClusters(seurat_object, resolution = 0.2)
 
 # Look at cluster IDs of the first 5 cells
-head(Idents(scNanoGPS), 5)
+head(Idents(seurat_object), 5)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -539,11 +545,11 @@ head(Idents(scNanoGPS), 5)
 # In particular, these methods aim to preserve local distances in the dataset 
 # (i.e. ensuring that cells with very similar gene expression profiles co-localize), but often do not preserve more global relationships. 
 # We encourage users to leverage techniques like UMAP for visualization, but to avoid drawing biological conclusions solely on the basis of visualization techniques.
-scNanoGPS <- RunUMAP(scNanoGPS, dims = 1:10)
+seurat_object <- RunUMAP(seurat_object, dims = 1:10)
 
 # # note that you can set `label = TRUE` or use the `LabelClusters` function to help label individual clusters
-# DimPlot(scNanoGPS, reduction = "umap")
-DimPlot(scNanoGPS, reduction = "umap", label = TRUE)
+# DimPlot(seurat_object, reduction = "umap")
+DimPlot(seurat_object, reduction = "umap", label = TRUE)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -567,25 +573,35 @@ my_plot_save(save_plot_umap)
 # to explore the `min.pct` and `logfc.threshold` parameters, 
 # which can be increased in order to increase the speed of DE testing.
 
-# Find all markers of cluster 2
-cluster2.markers <- FindMarkers(scNanoGPS, ident.1 = 1)
-cat('cluster2.markers, n = 5 : \n')
-head(cluster2.markers, n = 5)
+# #! ERROR
+# Error in FindMarkers.StdAssay(object = data.use, latent.vars = latent.vars,  : 
+#   data layers are not joined. Please run JoinLayers
+# TEST
+seurat_object <- JoinLayers(seurat_object)
+
+# # Find all markers of cluster 2
+# cluster2.markers <- FindMarkers(seurat_object, ident.1 = 2)
+# head(cluster2.markers, n = 5)
 
 # #! ERROR - if no clusters... breaks script!
 # Error in WhichCells.Seurat(object = object, idents = ident.1) : 
 #   Cannot find the following identities in the object: 2
 
 # Find markers for every cluster compared to all remaining cells, report only the positive ones
-scNanoGPS.markers <- FindAllMarkers(scNanoGPS, only.pos = TRUE)
-scNanoGPS.markers %>%
+seurat_object.markers <- FindAllMarkers(seurat_object, only.pos = TRUE)
+seurat_object.markers %>%
     group_by(cluster) %>%
     dplyr::filter(avg_log2FC > 1)
 
-# Seurat has several tests for differential expression which can be set with the `test.use` parameter 
-# (see our `DE vignette` ( https://satijalab.org/seurat/articles/de_vignette ) for details). 
-# For example, the ROC test returns the ‘classification power’ for any individual marker (ranging from 0 - random, to 1 - perfect).
-cluster0.markers <- FindMarkers(scNanoGPS, ident.1 = 0, logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
+# Get info
+cat('Final Seurat object (post filtering) stats: \n')
+print(seurat_object)
+
+# #* TODO - comment out?
+# # Seurat has several tests for differential expression which can be set with the `test.use` parameter 
+# # (see our `DE vignette` ( https://satijalab.org/seurat/articles/de_vignette ) for details). 
+# # For example, the ROC test returns the ‘classification power’ for any individual marker (ranging from 0 - random, to 1 - perfect).
+# cluster0.markers <- FindMarkers(seurat_object, ident.1 = 0, logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
 
 # We include several tools for visualizing marker expression. 
 # - `VlnPlot()` (shows expression probability distributions across clusters), and 
@@ -636,7 +652,7 @@ celltype_marker_loop <- function(
         celltype <- 'all'
 
       } else {
-        celltype <- names(data)[2]
+      celltype <- names(data)[2]
       }
 
       # CHECK
@@ -670,7 +686,7 @@ celltype_marker_loop <- function(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # # Test the gene lists
-# VlnPlot(scNanoGPS, features = genes_list)
+# VlnPlot(seurat_object, features = genes_list)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -682,7 +698,7 @@ celltype_marker_loop <- function(
 
 # RUN
 # Define the plotting operation BEFORE each celltype marker plotting call
-plotting_operation <- expression(VlnPlot(scNanoGPS, features  = gene_col))
+plotting_operation <- expression(VlnPlot(seurat_object, features  = gene_col))
 
 #! WARNING, needs to include the defaults even tho I provided it in the function's defaults
 celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name = 'gene_expression')
@@ -692,8 +708,8 @@ celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name =
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # you can plot raw counts as well
-# # VlnPlot(scNanoGPS, features = c("NKG7", "PF4"), slot = "counts", log = TRUE)
-# VlnPlot(scNanoGPS, features = genes_list, slot = "counts", log = TRUE)
+# # VlnPlot(seurat_object, features = c("NKG7", "PF4"), slot = "counts", log = TRUE)
+# VlnPlot(seurat_object, features = genes_list, slot = "counts", log = TRUE)
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
@@ -705,14 +721,14 @@ celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name =
 
 # RUN
 # Define the plotting operation BEFORE each celltype marker plotting call
-plotting_operation <- expression(VlnPlot(scNanoGPS, features = gene_col, slot = "counts", log = TRUE))
+plotting_operation <- expression(VlnPlot(seurat_object, features = gene_col, slot = "counts", log = TRUE))
 celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name = 'gene_expression_raw_counts')
 
 # -------------------------------------------
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# FeaturePlot(scNanoGPS, features = genes_list)
+# FeaturePlot(seurat_object, features = genes_list)
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
@@ -724,7 +740,7 @@ celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name =
 
 # RUN
 # Define the plotting operation BEFORE each celltype marker plotting call
-plotting_operation <- expression(FeaturePlot(scNanoGPS, features = gene_col))
+plotting_operation <- expression(FeaturePlot(seurat_object, features = gene_col))
 celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name = 'gene_expression_feature')
 
 # -------------------------------------------
@@ -733,15 +749,15 @@ celltype_marker_loop(celltype_marker_files_list, plotting_operation, plot_name =
 
 # `DoHeatmap()` ( https://satijalab.org/seurat/reference/doheatmap ) generates an expression heatmap for given cells and features. 
 # In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.
-scNanoGPS.markers %>%
+seurat_object.markers %>%
     group_by(cluster) %>%
     dplyr::filter(avg_log2FC > 1) %>%
     slice_head(n = 10) %>%
     ungroup() -> top10
 
 # PLOT - heatmap
-# DoHeatmap(scNanoGPS, features = top10$gene) + NoLegend()
-DoHeatmap(scNanoGPS, features = top10$gene) 
+# DoHeatmap(seurat_object, features = top10$gene) + NoLegend()
+DoHeatmap(seurat_object, features = top10$gene) 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -794,7 +810,7 @@ my_plot_save(save_plot_gene_expression_heatmap_top10)
 
 # FROM - SARAH
 # # PLOT
-# DotPlot(scNanoGPS, features = marker.genes) + RotatedAxis()
+# DotPlot(seurat_object, features = marker.genes) + RotatedAxis()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -805,7 +821,7 @@ my_plot_save(save_plot_gene_expression_heatmap_top10)
 # -------------------------------------------
 
 # RUN - w/all marker genes
-plotting_operation <- expression(DotPlot(scNanoGPS, features = gene_col) + RotatedAxis())
+plotting_operation <- expression(DotPlot(seurat_object, features = gene_col) + RotatedAxis())
 celltype_marker_loop(celltype_marker_full_list, plotting_operation, plot_name = 'gene_expression', celltype = 'all')
 
 # -------------------------------------------
@@ -814,7 +830,7 @@ celltype_marker_loop(celltype_marker_full_list, plotting_operation, plot_name = 
 
 # # FROM - SARAH
 # # DoHeatmap(subset(SH0106_clean), features = marker.genes, size = 3, draw.lines = F)
-# DoHeatmap(scNanoGPS, features = marker.genes, size = 3, draw.lines = T)
+# DoHeatmap(seurat_object, features = marker.genes, size = 3, draw.lines = T)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -825,7 +841,7 @@ celltype_marker_loop(celltype_marker_full_list, plotting_operation, plot_name = 
 # -------------------------------------------
 
 # RUN - w/all marker genes
-plotting_operation <- expression(DoHeatmap(scNanoGPS, features = gene_col, size = 3, draw.lines = T) + RotatedAxis())
+plotting_operation <- expression(DoHeatmap(seurat_object, features = gene_col, size = 3, draw.lines = T) + RotatedAxis())
 celltype_marker_loop(celltype_marker_full_list, plotting_operation, plot_name = 'gene_expression_heatmap_celltype_markers', celltype = 'all')
 
 # -------------------------------------------
@@ -839,14 +855,14 @@ celltype_marker_loop(celltype_marker_full_list, plotting_operation, plot_name = 
 
 # SAVE POINT
 # OUTPUT - .RDS PATH
-rds_path <- file.path(output_path, 'scNanoGPS.rds')
+rds_path <- file.path(output_path, 'seurat_object.rds')
 cat('rds_path = \n', rds_path, '\n')
 
 # EXPORT - .RDS file
-saveRDS(scNanoGPS, file = rds_path)
+saveRDS(seurat_object, file = rds_path)
 
 # # RELOAD - .RDS (if needed)
-# scNanoGPS <- readRDS(file = rds_path)
+# seurat_object <- readRDS(file = rds_path)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -881,14 +897,14 @@ saveRDS(scNanoGPS, file = rds_path)
 #   'Unknown'
 # )
 # 
-# names(new.cluster.ids) <- levels(scNanoGPS)
-# scNanoGPS <- RenameIdents(scNanoGPS, new.cluster.ids)
+# names(new.cluster.ids) <- levels(seurat_object)
+# seurat_object <- RenameIdents(seurat_object, new.cluster.ids)
 # 
 # # PLOT - w/relabeled cluster names
-# # DimPlot(scNanoGPS, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
-# DimPlot(scNanoGPS, reduction = "umap", label = TRUE, pt.size = 0.5)
+# # DimPlot(seurat_object, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+# DimPlot(seurat_object, reduction = "umap", label = TRUE, pt.size = 0.5)
 # # #! ERROR
-# # Error in names(new.cluster.ids) <- levels(scNanoGPS) : 
+# # Error in names(new.cluster.ids) <- levels(seurat_object) : 
 # #   'names' attribute [11] must be the same length as the vector [9]
 # 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -938,7 +954,7 @@ cat('celltype_marker_files_list: \n')
 paste(celltype_marker_files_list)
 cat('Initial Seurat object created stats: \n')
 print(scNanoGPS_initial_info)
-cat('Final Seurat object (post filtering) stats: \n') 
+cat('Final Seurat object (post filtering) stats: \n')
 print(scNanoGPS_final_info)
 
 cat('\nFilter parameters: \n')

@@ -45,9 +45,7 @@ current_time  <- format(Sys.time(),"%H-%M-%S")
 
 # # DEFINE PATHS
 # # Input path - takes a `filtered_feature_bc_matrix.h5`` file from Arc Cellranger output folder
-# input_dir <- '/data/CARD_singlecell/Brain_atlas/Cortex_opt/Psomagen102722/4546Cortex/outs/filtered_feature_bc_matrix.h5'
-# input_dir <- '/data/CARD_singlecell/Brain_atlas/Cortex_opt/Psomagen102722/SH-92-05/outs/filtered_feature_bc_matrix.h5'
-input_dir <- '/data/CARD_singlecell/Brain_atlas/NABEC_multiome/batch5/Multiome/SH-04-08-ARC/outs/filtered_feature_bc_matrix.h5'
+# input_dir <- '../..-ARC/outs/filtered_feature_bc_matrix.h5'
 cat('input_dir =', input_dir, '\n')
 
 #* TODO - fix the ID section OR make into argparse
@@ -272,6 +270,7 @@ plot2 <- LabelPoints(
   xnudge = 0,
   ynudge = 0
 )
+
 plot1 + plot2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -540,7 +539,7 @@ seurat_object.markers %>%
     group_by(cluster) %>%
     dplyr::filter(avg_log2FC > 1)
 
-# TEST
+# Get info
 cat('Final Seurat object (post filtering) stats: \n')
 print(seurat_object)
 
