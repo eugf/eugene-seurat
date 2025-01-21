@@ -1,5 +1,9 @@
 #!/usr/bin/env Rscript
 
+# # HOW TO RUN:
+# # - Open a terminal where this script file is and run:
+# Rscript SEURAT-for_scNanoGPS-merged-argparse.R <INPUT_DIR> --output-dir <OUTPUT_DIR> --celltype-marker-dir <CELLTYPE_MARKER_DIR>
+
 # SEURAT TUTORIAL
 # SOURCE: https://satijalab.org/seurat/articles/pbmc3k_tutorial
 
@@ -74,7 +78,6 @@ current_time  <- format(Sys.time(),"%H-%M-%S")
 # # DEFINE PATHS
 # Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
 # NOTE - the paths for this script are merged matrix + matrix_isoform.TSV files that were converted to those 3 files
-# input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/merged/SH-04-08/20241219-1'
 input_dir <- args$input_dir
 cat('input_dir =', input_dir, '\n')
 
@@ -253,6 +256,7 @@ my_plot_save(
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#* TODO - add to argparse?
 # FILTER MANUALLY - based on the violin plot
 filter_nFeature_RNA_lower <- 0
 filter_nFeature_RNA_upper <- 2500

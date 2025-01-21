@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
 
+# # HOW TO RUN:
+# # - Open a terminal where this script file is and run:
+# Rscript SEURAT-for_scNanoGPS-matrix_isoform-argparse.R --input-dir <INPUT_DIR> --output-dir <OUTPUT_DIR> --celltype-marker-dir <CELLTYPE_MARKER_DIR>
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # SEURAT TUTORIAL
 # SOURCE: https://satijalab.org/seurat/articles/pbmc3k_tutorial
 

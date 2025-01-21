@@ -17,10 +17,10 @@
 SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py'
 
 # INPUT PATHS
-INPUT_PATH='.../scNanoGPS/scNanoGPS_res/...'
+INPUT_PATH='<.../scNanoGPS/scNanoGPS_res/...>'
 
 # OUTPUT PATH
-OUTPUT_PATH='output/long_read'
+OUTPUT_PATH='../output/long_read'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

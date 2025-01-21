@@ -41,14 +41,14 @@ current_time  <- format(Sys.time(),"%H-%M-%S")
 
 # DEFINE PATHS
 # Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
-# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/SH-04-08/20241107'
+# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/SH-04-08/20241107'
+# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/SH-06-25/20241107'
+# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/SH-07-46/20241107'
+# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/SH-92-05/20241122'
+# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/UMARY_4546/20241106'
 
 # # TEST - merged files
 # input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/merged/SH-04-08/20241219-1'
-# input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/merged/SH-06-25/20241217'
-# input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/merged/SH-07-46/20241218'
-input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/merged/SH-92-05/20241218'
-# input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/merged/UMARY_4546/20241219-0'
 
 # CHECK
 cat('input_dir =', input_dir, '\n')
@@ -99,21 +99,13 @@ cat('Created directory at: \n', output_path, '\n')
 # LOAD DATA
 
 # SETUP THE SEURAT OBJECT
-# scNanoGPS.data <- Read10X(data.dir = input_dir, gene.column = 1) # TRY - removing the gene.column selection for the merged files
-scNanoGPS.data <- Read10X(data.dir = input_dir)
+scNanoGPS.data <- Read10X(data.dir = input_dir, gene.column = 1)
 
 # Initialize the Seurat object with the raw (non-normalized data).
 # pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
 scNanoGPS <- CreateSeuratObject(
   counts = scNanoGPS.data, 
   project = id)
-
-# #! ERROR
-# Warning: Feature names cannot have underscores ('_'), replacing with dashes ('-')
-# Error in validObject(.Object) : 
-#   invalid class “LogMap” object: Rownames cannot be empty strings
-# Calls: CreateSeuratObject ... initialize -> initialize -> initMatrix -> validObject
-# Execution halted
 
 # Get info
 cat('Initial Seurat object created stats: \n') 
@@ -235,17 +227,7 @@ my_plot_save(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # FILTER MANUALLY - based on the violin plot
-filter_nFeature_RNA_lower <- 0
-filter_nFeature_RNA_upper <- 2500
-filter_percent.mt         <- 5
-
-cat('\nFilter parameters: \n')
-cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
-cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
-cat('filter_percent.mt          =', filter_percent.mt, '\n')
-
-# scNanoGPS <- subset(scNanoGPS, subset = nFeature_RNA > 0 & nFeature_RNA < 2500 & percent.mt < 5)
-scNanoGPS <- subset(scNanoGPS, subset = nFeature_RNA > filter_nFeature_RNA_lower & nFeature_RNA < filter_nFeature_RNA_upper & percent.mt < filter_percent.mt)
+scNanoGPS <- subset(scNanoGPS, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -296,6 +278,7 @@ plot2 <- LabelPoints(
   xnudge = 0,
   ynudge = 0
 )
+
 plot1 + plot2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -640,6 +623,63 @@ celltype_marker_loop <- function(
     }
   }
 
+#* TODO - fix the 'Plotted all'
+
+# # MY  FUNCTION - loop thru all the celltype marker files for the `genes_list` parameter
+# celltype_marker_loop <- function(
+#   celltype_marker_files_list  = celltype_marker_files_list,
+#   plotting_operation          = plotting_operation,
+#   celltype                    = 'all',
+#   plot_name
+# ) 
+#   { # Loop through each file and read it from column 1
+#     for (file in celltype_marker_files_list) {
+
+#       # Read the CSV file, starting from column 1
+#       # Extract col 1 ('Gene')
+#       data <- read.csv(file)
+#       gene_col <- data[['Gene']]
+#       cat('gene_col = \n')
+#       cat(gene_col, '\n')
+
+#       # # NOTE: if `celltype` provided as function input, use that as manual override, otherwise extract from single celltype files
+#       # # Extract col 2's header (celltype)
+#       # if (celltype == 'all') {
+#       # } else {
+#       #   celltype <- names(data)[2]
+#       # }
+
+#       # TEST - it was naming celltype as 'all' but still plotting all the right stuff, shouldn't it just depend on the list I use?
+#       celltype <- names(data)[2]
+#       cat('celltype =', celltype, '\n')
+
+#       # You can now work with the data
+#       # PLOT
+#       result <- try({
+#         eval(plotting_operation) 
+#       })
+
+#       # CHECK - if an error occurred
+#       if (inherits(result, "try-error")) {
+#         cat("ERROR! With plotting", celltype, ': \n', result, '\n')
+
+#       } else {
+#         #* TODO - fix `celltype` set to `all` instead of each actual cell
+#         #* 
+#         cat("SUCCESS! Plotted", celltype, ': \n')
+#         plot(result)
+
+#         # SAVE PLOT
+#         save_plot_gene_expression <- my_plot_name(paste0(plot_name, '-', celltype)) 
+#         my_plot_save(
+#           save_plot_gene_expression,
+#           width     = 16,
+#           height    = 10
+#         )
+#       }
+#     }
+#   }
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # # Test the gene lists
@@ -911,26 +951,15 @@ print(args)
 cat('\nVARIABLES CALCULATED IN SCRIPT: \n')
 cat('input_dir = \n', input_dir, '\n')
 cat('output_path = \n', output_path, '\n')
-
-cat('\ntop 10 = \n')
+cat('top 10 = \n')
 paste(top10)
-
-cat('\ncelltype_marker_files_list: \n')
+cat('celltype_marker_files_list: \n')
 paste(celltype_marker_files_list)
-
-cat('\nInitial Seurat object created stats: \n')
+cat('Initial Seurat object created stats: \n')
 print(scNanoGPS_initial_info)
-
-cat('\nFinal Seurat object (post filtering) stats: \n') 
+cat('Final Seurat object (post filtering) stats: \n') 
 print(scNanoGPS_final_info)
-
-cat('\nFilter parameters: \n')
-cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
-cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
-cat('filter_percent.mt          =', filter_percent.mt, '\n')
-
-cat('\nSaved .RDS to: \n', rds_path, '\n')
-
+cat('Saved .RDS to: \n', rds_path, '\n')
 cat('\nsessionInfo: \n')
 sessionInfo()
 
