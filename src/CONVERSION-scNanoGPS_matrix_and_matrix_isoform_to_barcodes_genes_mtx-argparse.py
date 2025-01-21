@@ -82,7 +82,6 @@ print('args =', args)
 
 # DEFINE FILE PATHS - CHANGE THIS!!!
 # Input paths - look inside the scNanoGPS output folder (`/scNanoGPS_res`) by patient ID until you reach the parent folder that holds the matrix.tsv + matrix_isoform.tsv files
-# scNanoGPS_output_dir = '/data/CARDPB/data/snRNA_longread/scNanoGPS-neuro/scNanoGPS_res/SH-07-46_singlecell_LR/20241105-1/20241105'
 scNanoGPS_output_dir = args.input_path
 
 # From there, append the paths for the matrix files
@@ -99,7 +98,6 @@ print('file_path_matrix_isoform =', file_path_matrix_isoform)
 
 
 # # Output dir
-# output_dir = '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads'
 output_dir = args.output_path
 print('output_dir =', output_dir)
 
@@ -162,43 +160,6 @@ os.makedirs(sample_dir)
 
 
 # In[7]:
-
-
-# # TEST
-# # Turn the make directory checker into a func
-# def mkdir_checker(output_dir):
-    
-#     # Create unique output folders based on the patient ID and date
-#     global sample_dir
-#     sample_dir = os.path.join(output_dir, split_id, formatted_date)
-#     print('sample_dir =', sample_dir)
-
-#     # Start a counter for repeated folders
-#     counter = 0
-    
-#     # CHECK - if the path link exists as text, adjust name as needed
-#     if os.path.exists(sample_dir):
-#         print(f"The directory '{sample_dir}' exists.")
-#         new_sample_dir = sample_dir + '-' + str(counter)
-        
-#         # Increment on the date folder
-#         while os.path.exists(new_sample_dir):
-#             counter += 1
-#             print('counter =', counter)
-#             new_sample_dir = sample_dir + '-' + str(counter)
-#             print('new_sample_dir INSIDE IF BLOCK =', new_sample_dir)
-        
-#         # Reset this variable to call later
-#         sample_dir = new_sample_dir
-
-#     else:
-#         print(f"The directory '{sample_dir}' does not exist.")
-
-#     # Make the new directory 
-#     os.makedirs(sample_dir)
-
-# # RUN - func
-# mkdir_checker(output_dir)
 
 
 # In[8]:
@@ -831,6 +792,7 @@ df_isoform_header = pd.read_csv(
     nrows = 1,          # Only load the 1st row (the header row)
     header = None,      # Header begins on the 1st row
 )
+
 df_isoform_header
 
 
@@ -956,9 +918,6 @@ print(f'Saved matrix_isoform_dropped.tsv to: {file_path_matrix_isoform_dropped_t
 
 # Define output path
 output_file = os.path.join(output_isoform_dir, 'matrix.mtx')
-
-#! ERROR - check here for the exponents???
-# input_df = pd.read_csv(file_path_matrix_isoform_dropped_tsv)
 
 # Run conversion function
 tsv_to_mtx(file_path_matrix_isoform_dropped_tsv, output_file)
