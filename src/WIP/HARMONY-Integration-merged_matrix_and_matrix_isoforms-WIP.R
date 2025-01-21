@@ -33,7 +33,7 @@ require(harmony)
 current_date  <- as.character(Sys.Date())
 current_time  <- format(Sys.time(),"%H-%M-%S")
 
-# # DEFINE paths
+# # DEFINE paths -- change these!!!
 # # Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
 # # MATRIX FOLDERS
 # input_dir_1 <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/SH-04-08/20241107'
@@ -160,10 +160,6 @@ scNanoGPS.data2_merged <- Read10X(data.dir = input_dir_2_merged, gene.column=1)
 scNanoGPS.data3_merged <- Read10X(data.dir = input_dir_3_merged, gene.column=1)
 scNanoGPS.data4_merged <- Read10X(data.dir = input_dir_4_merged, gene.column=1)
 scNanoGPS.data5_merged <- Read10X(data.dir = input_dir_5_merged, gene.column=1)
-
-# #! ERROR
-# Error in Read10X(data.dir = input_dir_4_merged, gene.column = 1) : 
-#   Barcode file missing. Expecting barcodes.tsv.gz
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

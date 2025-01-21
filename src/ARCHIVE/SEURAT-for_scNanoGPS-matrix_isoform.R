@@ -212,7 +212,8 @@ VlnPlot(
     "nFeature_isoform"
     # "percent.mt"
     ), 
-  ncol = 3)
+  ncol = 3
+)
 
 #? Q) Why doesn't the `percent.mt` plot work?
 #? A) Cuz it's 0 across the board
@@ -313,6 +314,7 @@ plot2 <- LabelPoints(
   xnudge = 0,
   ynudge = 0
 )
+
 plot1 + plot2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -608,6 +610,7 @@ write.table(
   sep = "\t",
   quote = FALSE
 )
+
 # NOTES
 # - 2000 unique vals (so this is the filtered data, and it dropped the rest)
 # - 112643 missing values (yup that's the rest)

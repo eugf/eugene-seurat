@@ -14,7 +14,7 @@
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# # DEFINE VARIABLES FOR ARGPARSE - change these!!!
+# # DEFINE VARIABLES FOR ARGPARSE -- change these!!!
 
 # # LONG READS (MATRIX AND MATRIX_ISOFORM FOLDERS)
 # INPUT_DIR='/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/SH-04-08/20241107'
