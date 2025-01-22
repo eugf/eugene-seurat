@@ -9,12 +9,12 @@
 
 # HOW TO RUN:
 # - Open a terminal where this script file is and run:
-# sbatch CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse-sbatch.sh 
+# sbatch CONVERSION-scNanoGPS-matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse-sbatch.sh 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # DEFINE VARIABLES FOR ARGPARSE -- change these!!!
-SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py'
+SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/CONVERSION-scNanoGPS-matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py'
 
 # INPUT PATHS
 INPUT_PATH='<.../scNanoGPS/scNanoGPS_res/...>'

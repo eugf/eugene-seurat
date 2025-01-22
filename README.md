@@ -48,7 +48,7 @@ Takes the Single cell matrix outputs from running scNanoGPS on long read transcr
 
 | SBATCH                                                                                  | CALLS THIS SCRIPT                                                                | INPUT(S)                            | OUTPUT(S)                                                                                                |
 | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
-| CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse-sbatch.sh | CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py | matrix.tsv,<br />matrix_isoform.tsv | (For each input file:)<br />barcodes.tsv, <br />genes.tsv, <br />matrix.mtx, <br />id.txt                |
+| CONVERSION-scNanoGPS-matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse-sbatch.sh | CONVERSION-scNanoGPS-matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py | matrix.tsv,<br />matrix_isoform.tsv | (For each input file:)<br />barcodes.tsv, <br />genes.tsv, <br />matrix.mtx, <br />id.txt                |
 | CONVERSION-scNanoGPS-merged_matrix_and_matrix_isoform-argparse-sbatch.sh                | CONVERSION-scNanoGPS-merged_matrix_and_matrix_isoform-argparse.py                | matrix.tsv,<br />matrix_isoform.tsv | merged_matrix_and_matrix_isoform.tsv,<br />barcodes.tsv, <br />genes.tsv, <br />matrix.mtx, <br />id.txt |
 
 ### SEURAT

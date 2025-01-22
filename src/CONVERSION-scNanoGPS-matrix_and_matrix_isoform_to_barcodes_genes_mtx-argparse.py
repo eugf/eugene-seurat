@@ -1,14 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# STARTED:      10/4/24
-# 
-# LAST UPDATED: 12/32/24
-# 
-# By Eugene Fong
-# 
-# # #* TODO - add log?
-# 
 # # GOAL(S)
 # 
 # - Convert the outputs from scNanoGPS into a matrix file format that'll be accepted into Seurat
@@ -23,7 +15,7 @@
 #
 # # HOW TO RUN (for converting to a merged matrix + matrix_isoform file)
 # # - Open a terminal where this script file is and run:
-# python CONVERSION-scNanoGPS_matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py --input_path <INPUT_PATH> --output_path <OUTPUT_PATH>
+# python CONVERSION-scNanoGPS-matrix_and_matrix_isoform_to_barcodes_genes_mtx-argparse.py --input_path <INPUT_PATH> --output_path <OUTPUT_PATH>
 #
 # 
 # # IMPORTS
