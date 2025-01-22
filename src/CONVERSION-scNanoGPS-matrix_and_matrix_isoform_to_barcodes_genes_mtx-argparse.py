@@ -35,7 +35,7 @@ import argparse
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ARGUMENT PARSER 
-# Create ArgumentParser object
+# Create ArgumentParser object to take user inputs
 parser = argparse.ArgumentParser(description = 'Process arguments needed to run conversions from scNanoGPS outputs')
 
 # Define arguments for the user to supply
@@ -48,7 +48,7 @@ parser.add_argument(
 
 parser.add_argument(
     '--output_path', 
-    help        = 'Base folder for processed files and plots to be stored',
+    help        = 'Base folder for processed files and plots to be saved',
     required    = True,
     type        = str,
     )
@@ -56,41 +56,24 @@ parser.add_argument(
 # Parse arguments
 args = parser.parse_args()
 
-# CHECK
-print('args =', args)
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 # # LOAD DATA
-# 
 # See `/scNanoGPS_res` folder for a list of processed sample outputs at:
-# 
 #     /data/CARDPB/data/snRNA_longread/scNanoGPS-neuro/scNanoGPS_res
 
 # In[2]:
 
-
 # DEFINE FILE PATHS - CHANGE THIS!!!
 # Input paths - look inside the scNanoGPS output folder (`/scNanoGPS_res`) by patient ID until you reach the parent folder that holds the matrix.tsv + matrix_isoform.tsv files
 scNanoGPS_output_dir = args.input_path
-
-# From there, append the paths for the matrix files
 file_path_matrix            = os.path.join(scNanoGPS_output_dir, 'matrix.tsv')
 file_path_matrix_isoform    = os.path.join(scNanoGPS_output_dir, 'matrix_isoform.tsv')
 
-# CHECK
-print('scNanoGPS_output_dir     =', scNanoGPS_output_dir)
-print('file_path_matrix         =', file_path_matrix)
-print('file_path_matrix_isoform =', file_path_matrix_isoform)
-
-
 # In[3]:
 
-
-# # Output dir
+# Output dir
 output_dir = args.output_path
-print('output_dir =', output_dir)
 
 # In[4]:
 
