@@ -121,7 +121,6 @@ df = pd.read_csv(
     skiprows = 0,   # 1st row is metadata, skip it (index = 0)
     header = 1      # Header begins on the 2nd row (index = 1)
     )
-df.head()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -166,16 +165,15 @@ df_header = pd.read_csv(
     nrows = 1,      # Only load the next 1 row (the header row)
     header = None   # Prevents Pandas defaulting to header = True
     )
-df_header.head()
 
 # Converts to a 1D series
 header_series = df_header.squeeze()
+
 # Remove the initial columns from the header, keep the barcodes ONLY
 header_series_subset = header_series[7:]
-header_series_subset
+
 # Change the formatting to match examples and our data
 header_series_subset_mod = header_series_subset + '-1'
-header_series_subset_mod
 
 # ### EXPORT - `barcodes.tsv`
 
@@ -206,15 +204,13 @@ df_full = pd.read_csv(
     skiprows = [0,1],   # 1st row is metadata, 2nd is header, skip BOTH (index = 0,1),
     header = None,      # Prevents Pandas defaulting to header = True
     )
-df_full.head()
 
 # Now using the "full" DF, define the corresponding col's we want to drop
 cols_to_drop = df_full.columns[00:7]
 # APPLY - Drop to those cols in the full DF
 df_full_drop = df_full.drop(cols_to_drop, axis = 1)
-df_full_drop.head()
 
-# ### EXPORT - CHECK - processed DF to `matrix_dropped.tsv` file 
+# ### EXPORT - processed DF to `matrix_dropped.tsv` file 
 
 # Define output path
 file_path_matrix_dropped_tsv = os.path.join(sample_dir, 'matrix_dropped.tsv')
@@ -269,7 +265,6 @@ tsv_to_mtx(file_path_matrix_dropped_tsv, output_file)
 # DEFINE FILE PATHS
 # Output dir - new isoform folder inside the sample directory
 output_isoform_dir = os.path.join(sample_dir, 'isoform')
-# Make the new directory 
 os.makedirs(output_isoform_dir)
 
 # LOAD - matrix isoform file into a Pandas DF
@@ -277,7 +272,6 @@ df_isoform = pd.read_csv(
     file_path_matrix_isoform, 
     sep = '\t',     # For TSV file
     )
-df_isoform.head()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -327,7 +321,6 @@ df_isoform.to_csv(
 df_isoform['gene_name'] = df_isoform['Geneid'].str.split('_ENST').str[0]
 # Rename the `Geneid` col using the 1st element of the split and prepending it with 'ENST' to restore the lost characters from the split
 df_isoform['Geneid'] = 'ENST' + df_isoform['Geneid'].str.split('_ENST').str[1]
-df_isoform.head()
 
 # Select your desired cols
 df_isoform_gene_id_and_gene_name = df_isoform[['Geneid', 'gene_name']]
@@ -352,11 +345,9 @@ df_isoform_before_splitting = pd.read_csv(
     os.path.join(output_isoform_dir, 'isoform_before_splitting.tsv'),
     sep = '\t',     # For TSV file
     )
-df_isoform_before_splitting.head()
 
 # Select your desired cols
 df_isoform_before_splitting_gene_id = df_isoform_before_splitting[['Geneid']]
-df_isoform_before_splitting_gene_id.head()
 
 # OVERWRITE - the genes.tsv file with the original, unchanged, fused column name, but we'll just call it `Geneid`
 # Define output path
@@ -364,7 +355,6 @@ file_path_genes_tsv = os.path.join(output_isoform_dir, 'genes.tsv')
 
 # EXPORT - Save file as `genes.tsv`
 df_isoform_before_splitting_gene_id.to_csv(
-    # os.path.join(output_isoform_dir, 'genes.tsv'), 
     file_path_genes_tsv,
     sep = '\t',         # For TSV file
     index = False,      # Remove index col???
@@ -387,20 +377,15 @@ df_isoform_header = pd.read_csv(
     nrows = 1,          # Only load the 1st row (the header row)
     header = None,      # Header begins on the 1st row
     )
-df_isoform_header.head()
 
 # Drop the 1st col (the unnamed Geneid col here)
 df_isoform_header_skip = df_isoform_header.iloc[:, 1:]
-df_isoform_header_skip
 
 # Convert to a 1D series
 isoform_header_series = df_isoform_header_skip.squeeze()
-isoform_header_series.head(10)
 
 # Change the formatting to match examples and our data
-#* TODO - add the donor ID at a later step in Seurat instead of here (Cory suggested adding it here tho)
 isoform_header_series_mod = isoform_header_series + '-1'
-isoform_header_series_mod.head()
 
 # ### EXPORT - `barcodes.tsv`
 
@@ -431,13 +416,12 @@ df_isoform_full = pd.read_csv(
     skiprows = [0],     # 1st row is metadata (index = 0),
     header = None,      # Prevents Pandas defaulting to header = True
     )
-df_isoform_full.head()
 
 # Use the "full" DF
 cols_to_drop_isoform = df_isoform_full.columns[00:1]
+
 # APPLY - Drop to those cols in the full DF
 df_isoform_full_drop = df_isoform_full.drop(cols_to_drop_isoform, axis = 1)
-df_isoform_full_drop.head()
 
 # ### EXPORT - processed DF to `matrix_isoform_dropped.tsv` file
 
