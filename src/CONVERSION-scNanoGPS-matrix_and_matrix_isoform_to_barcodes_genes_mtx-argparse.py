@@ -329,116 +329,10 @@ df_isoform['gene_name'] = df_isoform['Geneid'].str.split('_ENST').str[0]
 df_isoform['Geneid'] = 'ENST' + df_isoform['Geneid'].str.split('_ENST').str[1]
 df_isoform.head()
 
-# CHECK - the length of the 'Geneid' col's unique values match pre/post splitting the names
-post_split = len(df_isoform['Geneid'].unique())
-print('pre_split    =', pre_split)
-print('post_split   =', post_split)
-assert pre_split == post_split, "ERROR! values lost!"
-
 # Select your desired cols
 df_isoform_gene_id_and_gene_name = df_isoform[['Geneid', 'gene_name']]
 
-# CHECK - the # of rows match
-num_rows_df_isoform                         = len(df_isoform)
-num_rows_df_isoform_gene_id_and_gene_name   = len(df_isoform_gene_id_and_gene_name)
-print('num_rows_df_isoform                          =', num_rows_df_isoform)
-print('num_rows_df_isoform_gene_id_and_gene_name    =', num_rows_df_isoform_gene_id_and_gene_name)
-assert num_rows_df_isoform == num_rows_df_isoform_gene_id_and_gene_name, "ERROR! # of rows in original DF and split col DF do NOT match"
-
-# CHECK - for dupes in the Geneid column only
-duplicates = df_isoform['Geneid'].duplicated(keep=False)  # keep=False marks all duplicates as True
-print("Unique values of dupes in Geneid col check = ", duplicates.unique())
-# COUNT - T/F values
-counts = duplicates.value_counts()
-print("Counts of T/F in duplicates:")
-print(counts)
-
-# CHECK - Show duplicate values
-duplicate_values = df_isoform['Geneid'][duplicates]
-print("Duplicate values in the Geneid column: \n", duplicate_values)
-
-
-# In[43]:
-
-
-# EXPORT - as text so i can read the whole thing
-duplicate_values.to_csv(
-    os.path.join(output_isoform_dir, 'df_isoform_duplicate_values.tsv'), 
-    sep = '\t',     # For TSV file
-    )
-
-
-# ### CHECK
-
-# In[44]:
-
-
-# # LOAD - isoform_var_features.tsv exported from the scNanoGPS Seurat object
-# df_isoform_var_features = pd.read_csv(
-#     "/home/fonge2/scNanoGPS/eugene-seurat/output/TEST/isoform/isoform_var_features.tsv", 
-#     sep = '\t',     # For TSV file
-# )
-# df_isoform_var_features
-
-
-# In[45]:
-
-
-# # CHECK - overlap betw the `genes.tsv` and `isoform_var_features.tsv` files
-# # Convert the 'Geneid' columns to sets
-# set1 = set(df_isoform['gene_name'])
-# set2 = set(df_isoform_var_features['x'])
-
-# # # CHECK - comment out cuz that's way too much text
-# # print('set1 = \n', set1)
-# # print('set2 = \n', set2)
-
-# # Find common elements
-# common_genes = set1.intersection(set2)
-# print('common_genes = \n', common_genes)
-
-# # Get the number of common values
-# num_common = len(common_genes)
-# print(f"Number of common values: {num_common}")
-
-
-# In[46]:
-
-
-# # CHECK - extract only the unique values from `isoform_var_features.tsv` --> this shouldn't matter actually
-
-# # CHECK - split the `x` column values on the .period. and only keep the 0th element
-
-# # Keep the 0th element to create a new `gene_name` column
-# df_isoform_var_features['x_split'] = df_isoform_var_features['x'].str.split('.').str[0]
-# df_isoform_var_features.head(50)
-
-
-# In[47]:
-
-
-# # CHECK - overlap betw the `genes.tsv` and `isoform_var_features.tsv` files
-# # Convert the 'Geneid' columns to sets
-# set1 = set(df_isoform['gene_name'])
-# set2 = set(df_isoform_var_features['x_split'])
-
-# # # CHECK
-# # print('set1 = \n', set1)
-# # print('set2 = \n', set2)
-
-# # Find common elements
-# common_genes = set1.intersection(set2)
-# print('common_genes = \n', common_genes)
-
-# # Get the number of common values
-# num_common = len(common_genes)
-# print(f"Number of common values: {num_common}")
-
-
 # ### EXPORT - `genes.tsv`
-
-# In[48]:
-
 
 # NOTE: overwriting the old genes.tsv path for matrix.tsv with the matrix_isoform.tsv path
 # Define output path
@@ -451,32 +345,18 @@ df_isoform_gene_id_and_gene_name.to_csv(
     index = False,      # Remove index col???
     header = False,     # Remove header row???
     )
-
 print(f'Saved genes.tsv to: {file_path_genes_tsv}')
-
-
-# In[49]:
-
 
 # RELOAD - matrix isoform file into a Pandas DF
 df_isoform_before_splitting = pd.read_csv(
     os.path.join(output_isoform_dir, 'isoform_before_splitting.tsv'),
     sep = '\t',     # For TSV file
     )
-
-df_isoform_before_splitting
-
-
-# In[50]:
-
+df_isoform_before_splitting.head()
 
 # Select your desired cols
 df_isoform_before_splitting_gene_id = df_isoform_before_splitting[['Geneid']]
-df_isoform_before_splitting_gene_id
-
-
-# In[ ]:
-
+df_isoform_before_splitting_gene_id.head()
 
 # OVERWRITE - the genes.tsv file with the original, unchanged, fused column name, but we'll just call it `Geneid`
 # Define output path
@@ -490,9 +370,9 @@ df_isoform_before_splitting_gene_id.to_csv(
     index = False,      # Remove index col???
     header = False,     # Remove header row???
     )
-
 print(f'Saved genes.tsv to: {file_path_genes_tsv}')
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ### Create the `barcodes.tsv` file
 # 
@@ -500,49 +380,29 @@ print(f'Saved genes.tsv to: {file_path_genes_tsv}')
 # - Drop the 1st col (ENS #s)
 # - NOTE: 1st col is empty and there's no other metadata cols
 
-# In[52]:
-
-
 # LOAD - matrix isoform file into a Pandas DF to get the header row only
 df_isoform_header = pd.read_csv(
     file_path_matrix_isoform, 
     sep = '\t',         # For TSV file
     nrows = 1,          # Only load the 1st row (the header row)
     header = None,      # Header begins on the 1st row
-)
-
-df_isoform_header
-
-
-# In[53]:
-
+    )
+df_isoform_header.head()
 
 # Drop the 1st col (the unnamed Geneid col here)
 df_isoform_header_skip = df_isoform_header.iloc[:, 1:]
 df_isoform_header_skip
 
-
-# In[54]:
-
-
 # Convert to a 1D series
 isoform_header_series = df_isoform_header_skip.squeeze()
 isoform_header_series.head(10)
 
-
-# In[55]:
-
-
 # Change the formatting to match examples and our data
 #* TODO - add the donor ID at a later step in Seurat instead of here (Cory suggested adding it here tho)
 isoform_header_series_mod = isoform_header_series + '-1'
-isoform_header_series_mod
-
+isoform_header_series_mod.head()
 
 # ### EXPORT - `barcodes.tsv`
-
-# In[56]:
-
 
 # Define output path
 file_path_barcodes_tsv = os.path.join(output_isoform_dir, 'barcodes.tsv')
@@ -554,18 +414,15 @@ isoform_header_series_mod.to_csv(
     index = False,      # Remove index col???
     header = False,     # Remove header row???
     )
-
 print(f'Saved barcodes.tsv to: {file_path_barcodes_tsv}')
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ### Create the `matrix.mtx` file
 # 
 # - Import `matrix_isoform.tsv` as a DF, 
 # - Keep `geneid` and then all the counts cols, drop the 1st row (header row) tho
 # - then convert to a sparse matrix format (needs matrix library to convert to DCG matrix)
-
-# In[ ]:
-
 
 # RELOAD - matrix file into a Pandas DF (but this time get rid of the header)
 df_isoform_full = pd.read_csv(
@@ -574,44 +431,15 @@ df_isoform_full = pd.read_csv(
     skiprows = [0],     # 1st row is metadata (index = 0),
     header = None,      # Prevents Pandas defaulting to header = True
     )
-
 df_isoform_full.head()
-
-
-# In[58]:
-
 
 # Use the "full" DF
 cols_to_drop_isoform = df_isoform_full.columns[00:1]
-print('cols_to_drop_isoform =', cols_to_drop_isoform)
-
-
-# In[59]:
-
-
 # APPLY - Drop to those cols in the full DF
 df_isoform_full_drop = df_isoform_full.drop(cols_to_drop_isoform, axis = 1)
-df_isoform_full_drop
-
-
-# In[60]:
-
-
-# CHECK - before and after
-df_isoform_full.info()
-
-
-# In[61]:
-
-
-# CHECK - should have only # dtypes
-df_isoform_full_drop.info()
-
+df_isoform_full_drop.head()
 
 # ### EXPORT - processed DF to `matrix_isoform_dropped.tsv` file
-
-# In[62]:
-
 
 # Define output path
 file_path_matrix_isoform_dropped_tsv = os.path.join(output_isoform_dir, 'matrix_dropped.tsv')
@@ -620,26 +448,17 @@ file_path_matrix_isoform_dropped_tsv = os.path.join(output_isoform_dir, 'matrix_
 df_isoform_full_drop.to_csv(
     file_path_matrix_isoform_dropped_tsv, 
     sep = '\t',         # For TSV file
-    index = False,      # Remove index col???
-    header = False,     # Remove header row???
+    index = False,      # Remove index col
+    header = False,     # Remove header row
     )
-
 print(f'Saved matrix_isoform_dropped.tsv to: {file_path_matrix_isoform_dropped_tsv}')
-
 
 # # CONVERSION - function to convert the TSV file a sparse matrix .MTX file
 # 
 # ### EXPORT - `matrix.mtx` file as a sparse matrix
-
-# In[63]:
-
 
 # Define output path
 output_file = os.path.join(output_isoform_dir, 'matrix.mtx')
 
 # Run conversion function
 tsv_to_mtx(file_path_matrix_isoform_dropped_tsv, output_file)
-
-# # CHECK
-# print(f'Saved matrix.mtx to: {output_file}')
-
