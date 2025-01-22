@@ -30,6 +30,12 @@ CELLTYPE_MARKER_DIR='/vf/users/CARD_singlecell/MONOCLE_V3/INPUTS/celltype_marker
 # ID -- required for user to input for the short reads!!!
 ID='UMARY_4546'
 
+# FILTER PARAMETERS
+# - These are actually the default values that's already there and is technically optional for me to enter, but I'm leaving them here as an example to remind people to fill this out, you'll need to adjust it later anyway
+FILTER_NFEATURE_RNA_LOWER=0
+FILTER_NFEATURE_RNA_UPPER=12000
+FILTER_PERCENT_MT=5
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # LOGGING (to slurm)
@@ -49,4 +55,7 @@ Rscript \
     --input-dir ${INPUT_DIR} \
     --output-dir ${OUTPUT_DIR} \
     --celltype-marker-dir ${CELLTYPE_MARKER_DIR} \
-    --id ${ID} || (echo 'R failed!'; exit 1)
+    --id ${ID} \
+    --filter_nFeature_RNA_lower ${FILTER_NFEATURE_RNA_LOWER} \
+    --filter_nFeature_RNA_upper ${FILTER_NFEATURE_RNA_UPPER} \
+    --filter_percent_mt ${FILTER_PERCENT_MT} || (echo 'R failed!'; exit 1)

@@ -70,6 +70,27 @@ parser$add_argument(
   type        = 'character'
 )
 
+parser$add_argument(
+  '--filter_nFeature_RNA_lower', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 0
+)
+
+parser$add_argument(
+  '--filter_nFeature_RNA_upper', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 12000
+)
+
+parser$add_argument(
+  '--filter_percent_mt', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 5
+)
+
 # LOAD USER-PROVIDED ARGUMENTS
 args <- parser$parse_args()
 
@@ -254,22 +275,20 @@ my_plot_save(
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#* TODO - add to argparse?
-# FILTER MANUALLY - based on the violin plot
-filter_nFeature_RNA_lower <- 0
-filter_nFeature_RNA_upper <- 12000
-filter_percent.mt         <- 5
+# # FILTER MANUALLY - based on the violin plot
+# filter_nFeature_RNA_lower <- 0
+# filter_nFeature_RNA_upper <- 12000
+# filter_percent_mt         <- 5
 
-cat('\nFilter parameters: \n')
-cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
-cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
-cat('filter_percent.mt          =', filter_percent.mt, '\n')
+filter_nFeature_RNA_lower <- args$filter_nFeature_RNA_lower
+filter_nFeature_RNA_upper <- args$filter_nFeature_RNA_upper
+filter_percent_mt         <- args$filter_percent_mt
 
 # seurat_object <- subset(seurat_object, subset = nFeature_RNA > 0 & nFeature_RNA < 2500 & percent.mt < 5)
 seurat_object <- subset(seurat_object, 
   subset  = nFeature_RNA > filter_nFeature_RNA_lower & 
             nFeature_RNA < filter_nFeature_RNA_upper & 
-            percent.mt < filter_percent.mt
+            percent.mt < filter_percent_mt
   )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -953,14 +972,9 @@ paste(top10)
 cat('celltype_marker_files_list: \n')
 paste(celltype_marker_files_list)
 cat('Initial Seurat object created stats: \n')
-print(scNanoGPS_initial_info)
+print(seurat_object_initial_info)
 cat('Final Seurat object (post filtering) stats: \n')
-print(scNanoGPS_final_info)
-
-cat('\nFilter parameters: \n')
-cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
-cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
-cat('filter_percent.mt          =', filter_percent.mt, '\n')
+print(seurat_object_final_info)
 
 cat('\nSaved .RDS to: \n', rds_path, '\n')
 
