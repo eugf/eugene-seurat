@@ -33,12 +33,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # IMPORTS 
-require(argparse)
 require(dplyr)
 require(Seurat)
 require(patchwork)
 require(base)
 require(ggplot2)
+require(argparse)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -66,6 +66,21 @@ parser$add_argument(
   type        = 'character'
 )
 
+parser$add_argument(
+  '--filter_nFeature_RNA_lower', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 0
+)
+
+parser$add_argument(
+  '--filter_nFeature_RNA_upper', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 250
+)
+
+
 # LOAD USER-PROVIDED ARGUMENTS
 args <- parser$parse_args()
 
@@ -77,15 +92,13 @@ args <- parser$parse_args()
 current_date  <- as.character(Sys.Date())
 current_time  <- format(Sys.time(),"%H-%M-%S")
 
-# DEFINE PATHS
+# # DEFINE PATHS
 # Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
-# input_dir <- '/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/output/TEST/isoform'
 input_dir <- file.path(args$input_dir, 'isoform')
 cat('input_dir =', input_dir, '\n')
 
 #* TODO - turn the ID part into a function?
 # Get the patient ID #
-# id_path <- file.path(input_dir, 'id.txt')
 id_path <- file.path(input_dir, '..', 'id.txt')
 cat('id_path =', id_path, '\n')
 id <- readLines(id_path)
@@ -98,11 +111,7 @@ rejoined_ids
 id <- rejoined_ids
 cat('id =', id, '\n')
 
-#? Q) is it possible that none of our usual cell marker types would exist in an isoform list?
-#? A) Some are tho
-#* TODO - Might be named differently, run thru the regular matrix.tsv file first and save those plots to compare
-
-# # Define output path
+# # Output path
 # output_dir <- input_dir
 output_dir <- args$output_dir 
 output_path <- file.path(output_dir, 'isoform','PLOTS-Seurat-matrix_isoform')
@@ -192,7 +201,7 @@ head(scNanoGPS@meta.data, 5)
 
 # MY FUNCTIONS
 
-# FILE NAMING - Construct the file name
+# FUNCTION - to construct the file name
 my_plot_name <- function(plot_name = "") {
   
   # Construct file name and output folder based on user-input and other defined vars
@@ -288,9 +297,16 @@ my_plot_save(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # FILTER MANUALLY - based on the violin plot
-# scNanoGPS <- subset(scNanoGPS, subset = nFeature_isoform > 200 & nFeature_isoform < 2500 & percent.mt < 5)
-# scNanoGPS <- subset(scNanoGPS, subset = nFeature_isoform > 0 & nFeature_isoform < 200 & percent.mt < 5)
-scNanoGPS <- subset(scNanoGPS, subset = nFeature_isoform > 0 & nFeature_isoform < 250)
+# filter_nFeature_RNA_lower <- 0
+# filter_nFeature_RNA_upper <- 250
+
+filter_nFeature_RNA_lower <- args$filter_nFeature_RNA_lower
+filter_nFeature_RNA_upper <- args$filter_nFeature_RNA_upper
+
+scNanoGPS <- subset(scNanoGPS, 
+  subset =  nFeature_isoform > filter_nFeature_RNA_lower & 
+            nFeature_isoform < filter_nFeature_RNA_upper
+  )
 
 # #! ERROR - if you keep the `percent.mt`
 # Warning: No layers found matching search pattern provided
@@ -1007,15 +1023,19 @@ print(args)
 cat('\nVARIABLES CALCULATED IN SCRIPT: \n')
 cat('input_dir = \n', input_dir, '\n')
 cat('output_path = \n', output_path, '\n')
-cat('top 10 = \n')
+
+cat('\ntop 10 = \n')
 paste(top10)
+
 cat('celltype_marker_files_list: \n')
 paste(celltype_marker_files_list)
 cat('Initial Seurat object created stats: \n')
 print(scNanoGPS_initial_info)
 cat('Final Seurat object (post filtering) stats: \n')
 print(scNanoGPS_final_info)
-cat('Saved .RDS to: \n', rds_path, '\n')
+
+cat('\nSaved .RDS to: \n', rds_path, '\n')
+
 cat('\nsessionInfo: \n')
 sessionInfo()
 

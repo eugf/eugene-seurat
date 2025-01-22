@@ -194,7 +194,7 @@ head(seurat_object@meta.data, 5)
 
 # MY FUNCTIONS
 
-# FILE NAMING - Construct the file name
+# FUNCTION - to construct the file name
 my_plot_name <- function(plot_name = "") {
   
   # Construct file name and output folder based on user-input and other defined vars

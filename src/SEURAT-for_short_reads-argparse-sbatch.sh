@@ -17,18 +17,17 @@
 SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_short_reads-argparse.R'
 
 # # SHORT READS
-# INPUT_DIR='<...output/merged/...>'
-INPUT_DIR='/data/CARD_singlecell/Brain_atlas/Cortex_opt/Psomagen102722/4546Cortex/outs/filtered_feature_bc_matrix.h5'
+INPUT_DIR='<...output/merged/...>'
 
 # OUTPUT FOLDER
 # NOTE - I'm reusing the same input folder, but you can change it to wherever you want
-OUTPUT_DIR='/data/CARDPB/data/snRNA_longread/eugene-seurat/output/short_reads'
+OUTPUT_DIR='../output/short_reads'
 
 # CELLTYPE MARKER TABLES
 CELLTYPE_MARKER_DIR='/vf/users/CARD_singlecell/MONOCLE_V3/INPUTS/celltype_marker_tables_split'
 
 # ID -- required for user to input for the short reads!!!
-ID='UMARY_4546'
+ID=<'SAMPLE_ID#'>
 
 # FILTER PARAMETERS
 # - These are actually the default values that's already there and is technically optional for me to enter, but I'm leaving them here as an example to remind people to fill this out, you'll need to adjust it later anyway

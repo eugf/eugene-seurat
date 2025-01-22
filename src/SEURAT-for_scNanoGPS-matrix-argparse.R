@@ -33,12 +33,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # IMPORTS 
-require(argparse)
 require(dplyr)
 require(Seurat)
 require(patchwork)
 require(base)
 require(ggplot2)
+require(argparse)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -66,6 +66,27 @@ parser$add_argument(
   type        = 'character'
 )
 
+parser$add_argument(
+  '--filter_nFeature_RNA_lower', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 0
+)
+
+parser$add_argument(
+  '--filter_nFeature_RNA_upper', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 200
+)
+
+parser$add_argument(
+  '--filter_percent_mt', 
+  required    = FALSE,
+  type        = 'character',
+  default     = 5
+)
+
 # LOAD USER-PROVIDED ARGUMENTS
 args <- parser$parse_args()
 
@@ -77,9 +98,8 @@ args <- parser$parse_args()
 current_date  <- as.character(Sys.Date())
 current_time  <- format(Sys.time(),"%H-%M-%S")
 
-# DEFINE PATHS
+# # DEFINE PATHS
 # Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
-# input_dir <- '/data/CARDPB/data/snRNA_longread/eugene-seurat/output/long_reads/SH-04-08/20241107-1'
 input_dir <- args$input_dir
 cat('input_dir =', input_dir, '\n')
 
@@ -97,7 +117,7 @@ rejoined_ids
 id <- rejoined_ids
 cat('id =', id, '\n')
 
-# Output path
+# # Output path
 # output_dir <- input_dir
 output_dir <- args$output_dir
 output_path <- file.path(output_dir, 'PLOTS-Seurat-matrix')
@@ -257,18 +277,21 @@ my_plot_save(
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# FILTER MANUALLY - based on the violin plot
-filter_nFeature_RNA_lower <- 0
-filter_nFeature_RNA_upper <- 200
-filter_percent.mt         <- 5
+# # FILTER MANUALLY - based on the violin plot
+# filter_nFeature_RNA_lower <- 0
+# filter_nFeature_RNA_upper <- 200
+# filter_percent.mt         <- 5
 
-cat('\nFilter parameters: \n')
-cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
-cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
-cat('filter_percent.mt          =', filter_percent.mt, '\n')
+filter_nFeature_RNA_lower <- args$filter_nFeature_RNA_lower
+filter_nFeature_RNA_upper <- args$filter_nFeature_RNA_upper
+filter_percent_mt         <- args$filter_percent_mt
 
 # scNanoGPS <- subset(scNanoGPS, subset = nFeature_RNA > 0 & nFeature_RNA < 2500 & percent.mt < 5)
-scNanoGPS <- subset(scNanoGPS, subset = nFeature_RNA > filter_nFeature_RNA_lower & nFeature_RNA < filter_nFeature_RNA_upper & percent.mt < filter_percent.mt)
+scNanoGPS <- subset(scNanoGPS, 
+  subset  = nFeature_RNA > filter_nFeature_RNA_lower & 
+            nFeature_RNA < filter_nFeature_RNA_upper & 
+            percent.mt < filter_percent_mt
+  )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -319,6 +342,7 @@ plot2 <- LabelPoints(
   xnudge = 0,
   ynudge = 0
 )
+
 plot1 + plot2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -935,11 +959,6 @@ cat('Initial Seurat object created stats: \n')
 print(scNanoGPS_initial_info)
 cat('Final Seurat object (post filtering) stats: \n')
 print(scNanoGPS_final_info)
-
-cat('\nFilter parameters: \n')
-cat('filter_nFeature_RNA_lower  =', filter_nFeature_RNA_lower, '\n')
-cat('filter_nFeature_RNA_upper  =', filter_nFeature_RNA_upper, '\n')
-cat('filter_percent.mt          =', filter_percent.mt, '\n')
 
 cat('\nSaved .RDS to: \n', rds_path, '\n')
 

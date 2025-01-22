@@ -44,30 +44,46 @@ module load R/4.4
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# # SCRIPT(S) TO RUN - based on which file you want to use as input
+# # SCRIPT(S) TO RUN - based on which file(s) you want to use as input
 
 # # MATRIX FILE
 
 # SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_scNanoGPS-matrix-argparse.R'
 
+# # FILTER PARAMETERS
+# FILTER_NFEATURE_RNA_LOWER=0
+# FILTER_NFEATURE_RNA_UPPER=200
+# FILTER_PERCENT_MT=5
+
 # Rscript \
 #     ${SCRIPT_PATH} \
 #     --input-dir ${INPUT_DIR} \
 #     --output-dir ${OUTPUT_DIR} \
-#     --celltype-marker-dir ${CELLTYPE_MARKER_DIR} || (echo 'R failed!'; exit 1)
+#     --celltype-marker-dir ${CELLTYPE_MARKER_DIR} \
+#     --filter_nFeature_RNA_lower ${FILTER_NFEATURE_RNA_LOWER} \
+#     --filter_nFeature_RNA_upper ${FILTER_NFEATURE_RNA_UPPER} \
+#     --filter_percent_mt ${FILTER_PERCENT_MT} || (echo 'R failed!'; exit 1)
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # # MATRIX ISOFORM FILE
 
-# SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_scNanoGPS-matrix_isoform-argparse.R'
+# # SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_scNanoGPS-matrix_isoform-argparse.R'
+
+# # FILTER PARAMETERS
+# FILTER_NFEATURE_RNA_LOWER=0
+# FILTER_NFEATURE_RNA_UPPER=250
+# FILTER_PERCENT_MT=5
 
 # Rscript \
 #     ${SCRIPT_PATH} \
 #     --input-dir ${INPUT_DIR} \
 #     --output-dir ${OUTPUT_DIR} \
-#     --celltype-marker-dir ${CELLTYPE_MARKER_DIR} || (echo 'R failed!'; exit 1)
-
+#     --celltype-marker-dir ${CELLTYPE_MARKER_DIR} \
+#     --filter_nFeature_RNA_lower ${FILTER_NFEATURE_RNA_LOWER} \
+#     --filter_nFeature_RNA_upper ${FILTER_NFEATURE_RNA_UPPER} \
+#     --filter_percent_mt ${FILTER_PERCENT_MT} || (echo 'R failed!'; exit 1)
+# 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # MERGED (MATRIX + MATRIX_ISOFORM)
@@ -75,8 +91,16 @@ module load R/4.4
 
 SCRIPT_PATH='/vf/users/CARDPB/data/snRNA_longread/eugene-seurat/src/SEURAT-for_scNanoGPS-merged-argparse.R'
 
+# FILTER PARAMETERS
+FILTER_NFEATURE_RNA_LOWER=0
+FILTER_NFEATURE_RNA_UPPER=2500
+FILTER_PERCENT_MT=5
+
 Rscript \
     ${SCRIPT_PATH} \
     --input-dir ${INPUT_DIR} \
     --output-dir ${OUTPUT_DIR} \
-    --celltype-marker-dir ${CELLTYPE_MARKER_DIR} || (echo 'R failed!'; exit 1)
+    --celltype-marker-dir ${CELLTYPE_MARKER_DIR} \
+    --filter_nFeature_RNA_lower ${FILTER_NFEATURE_RNA_LOWER} \
+    --filter_nFeature_RNA_upper ${FILTER_NFEATURE_RNA_UPPER} \
+    --filter_percent_mt ${FILTER_PERCENT_MT} || (echo 'R failed!'; exit 1)
