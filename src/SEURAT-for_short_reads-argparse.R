@@ -138,8 +138,6 @@ create_incremented_dir <- function(base_dir) {
 output_path <- create_incremented_dir(output_path)
 cat('Created directory at: \n', output_path, '\n')
 
-#* TODO - Cory still said that I'd need to add the patient IDs to the barcode column
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # LOAD DATA
