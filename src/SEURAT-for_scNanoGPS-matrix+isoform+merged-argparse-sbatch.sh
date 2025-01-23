@@ -44,7 +44,7 @@ module load R/4.4
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# # SCRIPT(S) TO RUN - based on which file(s) you want to use as input
+# # SCRIPT(S) TO RUN - uncomment/comment out based on which file(s) you want to use as input
 
 # # MATRIX FILE
 
