@@ -68,6 +68,8 @@ file_path_matrix_isoform    = os.path.join(scNanoGPS_output_dir, 'matrix_isoform
 # Output dir
 output_dir = args.output_path
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # PROCESSING
 # Extract the patient ID
 id = os.path.basename(os.path.dirname(os.path.dirname(scNanoGPS_output_dir)))
