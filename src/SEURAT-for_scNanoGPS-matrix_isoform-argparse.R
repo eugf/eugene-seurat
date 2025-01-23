@@ -250,7 +250,7 @@ scNanoGPS <- FindVariableFeatures(scNanoGPS, selection.method = "vst", nfeatures
 top10 <- head(VariableFeatures(scNanoGPS), 10)
 
 # Plot variable features with and without labels
-plot1 <- VariableFeaturePlot(scNanoGPS)4
+plot1 <- VariableFeaturePlot(scNanoGPS)
 
 plot2 <- LabelPoints(
   plot = plot1,
@@ -401,8 +401,6 @@ write.table(
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# -------------------------------------------
-
 # Import celltype marker files from Monocle folder
 celltype_marker_dir <- args$celltype_marker_dir
 celltype_marker_files_list <- list.files(path = celltype_marker_dir, full.names = TRUE)
@@ -411,7 +409,7 @@ celltype_marker_files_list <- list.files(path = celltype_marker_dir, full.names 
 #* NOTE - make sure to set the `celltype` to 'all' for the celltype_marker_loop if you use this list
 celltype_marker_full_list <- '/vf/users/CARD_singlecell/MONOCLE_V3/INPUTS/celltype_marker_tables-marker_table0124.csv'
 
-# -------------------------------------------
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # FUNCTION - loop thru all the celltype marker files for the `genes_list` parameter
 celltype_marker_loop <- function(
