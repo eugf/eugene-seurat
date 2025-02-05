@@ -26,12 +26,16 @@ require(argparse)
 # INITIALIZE ARGPARSE
 parser <- ArgumentParser()
 
-# DEFINE ARGUMENTS THE USER WILL PROVIDE
+# DEFINE DIRECTORY PATHS, FILES, AND FILTER CONDITIONS THE USER MUST PROVIDE
 parser$add_argument(
   '--input-dir', 
   required    = TRUE,
   type        = 'character'
 )
+
+#* TODO - add this:
+# Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
+# NOTE - the paths for this script are merged matrix + matrix_isoform.TSV files that were converted to those 3 files
 
 parser$add_argument(
   '--output-dir', 
@@ -78,8 +82,7 @@ current_date  <- as.character(Sys.Date())
 current_time  <- format(Sys.time(),"%H-%M-%S")
 
 # # DEFINE PATHS
-# Input path - takes the results of converting the `/scNanoGPS_res` folder into: barcodes.tsv, genes.tsv, and matrix.mtx
-# NOTE - the paths for this script are merged matrix + matrix_isoform.TSV files that were converted to those 3 files
+
 input_dir <- args$input_dir
 
 # Get the Sample ID #
@@ -381,8 +384,6 @@ my_plot_save(save_plot_umap)
 # FINDING DIFFERENTIALLY EXPRESSED FEATURES (CLUSTER BIOMARKERS)
 # Find all markers of cluster 2
 cluster2.markers <- FindMarkers(scNanoGPS, ident.1 = 1)
-cat('cluster2.markers, n = 5 : \n')
-head(cluster2.markers, n = 5)
 
 # Find markers for every cluster compared to all remaining cells, report only the positive ones
 scNanoGPS.markers <- FindAllMarkers(scNanoGPS, only.pos = TRUE)
